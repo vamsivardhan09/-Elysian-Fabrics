@@ -18,6 +18,8 @@ export interface Product {
   stock?: number;
   inStock: boolean;
   featured: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CartItem {

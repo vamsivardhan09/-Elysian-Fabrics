@@ -12,31 +12,45 @@ export const authOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('[NextAuth] Login attempt for email:', credentials?.email);
         if (!credentials?.email || !credentials?.password) {
+          console.log('[NextAuth] Missing email or password in request.');
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email.trim().toLowerCase() }
-        });
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email.trim().toLowerCase() }
+          });
 
-        if (!user) {
+          console.log('[NextAuth] Database query complete. User found in DB:', !!user);
+          if (!user) {
+            console.log('[NextAuth] Authentication failed: User not found in database.');
+            return null;
+          }
+
+          // Support both hashed comparison and unhashed fallback
+          const isHashedMatch = await bcrypt.compare(credentials.password, user.password).catch(() => false);
+          const isPlaintextMatch = user.password === credentials.password;
+          const isPasswordValid = isHashedMatch || isPlaintextMatch;
+
+          console.log('[NextAuth] Password checks: Hashed match:', isHashedMatch, '| Plaintext match:', isPlaintextMatch);
+
+          if (isPasswordValid) {
+            console.log('[NextAuth] Authentication successful for:', user.email, 'with role:', user.role);
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            };
+          }
+          console.log('[NextAuth] Authentication failed: Password incorrect.');
+          return null;
+        } catch (error: any) {
+          console.error('[NextAuth] Database connection or query error during login:', error.message || error);
           return null;
         }
-
-        // Support both hashed comparison and unhashed fallback (for development/seed convenience)
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
-          .catch(() => false) || user.password === credentials.password;
-
-        if (isPasswordValid) {
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          };
-        }
-        return null;
       }
     })
   ],

@@ -1,0 +1,80 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("USER") // ADMIN or USER
+  name      String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  name          String
+  price         Float
+  originalPrice Float
+  image         String
+  images        String      @default("[]") // JSON array of image URLs
+  description   String?
+  category      String      @default("Dresses")
+  sizes         String      @default("[]") // JSON array e.g. ["XS","S","M","L","XL","XXL"]
+  colors        String      @default("[]") // JSON array e.g. ["Red","Blue","Green"]
+  fabric        String?
+  careInstr     String?
+  stock         Int         @default(10) // Inventory stock count
+  inStock       Boolean     @default(true)
+  featured      Boolean     @default(false)
+  orderItems    OrderItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id                 String      @id @default(uuid())
+  trackingId         String      @unique
+  status             String      @default("PENDING") // PENDING, PROCESSING, PACKED, SHIPPED, DELIVERED, CANCELLED
+  total              Float
+  userId             String?
+  user               User?       @relation(fields: [userId], references: [id])
+  customerName       String?
+  customerPhone      String?
+  customerEmail      String?
+  address            String?
+  trackingLink       String?
+  courierName        String?     // Courier Carrier Name (e.g. BlueDart, Delhivery)
+  courierTrackingId  String?     // Actual Courier Tracking Number
+  expectedDelivery   String?     // Expected Date of Delivery
+  notes              String?
+  items              OrderItem[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model OrderItem {
+  id             String   @id @default(uuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  quantity       Int
+  price          Float
+  selectedSize   String?
+  selectedColor  String?
+  customization  String?  // JSON string for custom measurements/notes
+}

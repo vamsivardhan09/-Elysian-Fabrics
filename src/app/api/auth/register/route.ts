@@ -5,10 +5,10 @@ import bcrypt from 'bcryptjs';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, name } = body;
+    const { email, password, name, code } = body;
 
-    if (!email || !password || !name) {
-      return NextResponse.json({ error: 'Name, email, and password are required' }, { status: 400 });
+    if (!email || !password || !name || !code) {
+      return NextResponse.json({ error: 'Name, email, password, and OTP code are required' }, { status: 400 });
     }
 
     const trimmedEmail = email.trim().toLowerCase();
@@ -21,6 +21,24 @@ export async function POST(request: Request) {
     if (existing) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 400 });
     }
+
+    // Verify OTP Code
+    const activeToken = await prisma.otpToken.findFirst({
+      where: {
+        email: trimmedEmail,
+        code: code.trim(),
+        expiresAt: { gt: new Date() }
+      }
+    });
+
+    if (!activeToken) {
+      return NextResponse.json({ error: 'Invalid or expired OTP code' }, { status: 400 });
+    }
+
+    // Clean up OTP token
+    await prisma.otpToken.delete({
+      where: { id: activeToken.id }
+    });
 
     // Hash the password using bcryptjs
     const hashedPassword = await bcrypt.hash(password, 10);

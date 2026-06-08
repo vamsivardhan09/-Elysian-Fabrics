@@ -15,6 +15,7 @@ model User {
   role      String   @default("USER") // ADMIN or USER
   name      String?
   orders    Order[]
+  products  Product[] // Products uploaded by this user (if tailor/admin)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -35,9 +36,22 @@ model Product {
   stock         Int         @default(10) // Inventory stock count
   inStock       Boolean     @default(true)
   featured      Boolean     @default(false)
+  userId        String?     // Associated vendor/tailor user
+  user          User?       @relation(fields: [userId], references: [id])
+  isApproved    Boolean     @default(true) // Admin products approved by default
   orderItems    OrderItem[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+}
+
+model OtpToken {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
 }
 
 model Category {

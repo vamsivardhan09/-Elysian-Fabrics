@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
@@ -52,13 +53,74 @@ export const authOptions = {
           return null;
         }
       }
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     })
   ],
   callbacks: {
+    async signIn({ user, account, profile }: any) {
+      if (account?.provider === 'google') {
+        const email = user.email?.trim().toLowerCase();
+        if (!email) {
+          console.log('[NextAuth] Google sign in failed: missing email in profile');
+          return false;
+        }
+
+        try {
+          // Check if user exists in the database
+          let existingUser = await prisma.user.findUnique({
+            where: { email }
+          });
+
+          if (!existingUser) {
+            console.log('[NextAuth] Creating new user for Google login:', email);
+            
+            // Auto-assign ADMIN role to owner emails
+            const role = (email === 'vamsivardhan0918@gmail.com' || email === 'vv727457@gmail.com') ? 'ADMIN' : 'USER';
+            
+            existingUser = await prisma.user.create({
+              data: {
+                email,
+                name: user.name || 'Google User',
+                password: await bcrypt.hash(Math.random().toString(36).substring(2, 15), 10), // secure random password
+                role: role
+              }
+            });
+            console.log('[NextAuth] Google user registered in DB with role:', role);
+          } else {
+            console.log('[NextAuth] Google user exists in DB:', email, 'with role:', existingUser.role);
+          }
+
+          // Attach database fields to user object for the jwt callback
+          user.id = existingUser.id;
+          user.role = existingUser.role;
+          user.name = existingUser.name;
+        } catch (error: any) {
+          console.error('[NextAuth] Error syncing Google user in DB:', error.message || error);
+          return false; // Block sign-in if db write fails
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+      } else if (token.email && !token.role) {
+        // Fallback session lookup for OAuth sessions
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email.trim().toLowerCase() }
+          });
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.role = dbUser.role;
+          }
+        } catch {
+          // Ignore DB connection errors in token sign-ins
+        }
       }
       return token;
     },

@@ -30,8 +30,13 @@ export async function GET() {
 
     return NextResponse.json(categories);
   } catch (error) {
-    console.error("Failed to fetch categories:", error);
-    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
+    console.warn("[API/categories GET] Database unreachable. Falling back to default categories.", error);
+    const mockCategories = DEFAULT_CATEGORIES.map((name, index) => ({
+      id: `mock-c${index + 1}`,
+      name,
+      createdAt: new Date().toISOString()
+    }));
+    return NextResponse.json(mockCategories);
   }
 }
 

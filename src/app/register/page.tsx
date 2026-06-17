@@ -400,7 +400,7 @@ export default function RegisterPage() {
                   try {
                     const checkRes = await fetch('/api/auth/google-config');
                     const config = await checkRes.json();
-                    if (config.configured) {
+                    if (config.configured || config.isProduction) {
                       signIn('google', { callbackUrl: '/' });
                     } else {
                       console.log('[Register] Google OAuth not configured. Authenticating with offline Google Mock user...');

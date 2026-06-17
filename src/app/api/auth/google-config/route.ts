@@ -7,5 +7,10 @@ export async function GET() {
     process.env.GOOGLE_CLIENT_SECRET !== undefined && 
     process.env.GOOGLE_CLIENT_SECRET.trim().length > 0;
     
-  return NextResponse.json({ configured: isConfigured });
+  const isProduction = process.env.NODE_ENV === 'production';
+    
+  return NextResponse.json({ 
+    configured: isConfigured, 
+    isProduction: isProduction 
+  });
 }

@@ -79,6 +79,7 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [dbConnected, setDbConnected] = useState(true);
 
   // Category form
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -103,6 +104,7 @@ export default function AdminDashboard() {
     fetchProducts(); 
     fetchOrders(); 
     fetchCategories();
+    checkDbStatus();
   }, []);
 
   async function fetchProducts() {
@@ -136,6 +138,20 @@ export default function AdminDashboard() {
     } finally { setLoadingCategories(false); }
   }
 
+  async function checkDbStatus() {
+    try {
+      const res = await fetch("/api/db-status");
+      if (res.ok) {
+        const data = await res.json();
+        setDbConnected(data.connected);
+      } else {
+        setDbConnected(false);
+      }
+    } catch {
+      setDbConnected(false);
+    }
+  }
+
   if (status === "loading") return (
     <div className="min-h-screen bg-[var(--color-cream)] flex items-center justify-center">
       <div className="w-10 h-10 border-4 border-[var(--color-rosegold)] border-t-transparent rounded-full animate-spin" />
@@ -145,6 +161,54 @@ export default function AdminDashboard() {
   if (!session || (session.user as any)?.role !== "ADMIN") {
     router.push("/login"); return null;
   }
+
+  // Client-side image compression and Base64 reader helper
+  const readAsBase64WithCompression = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 1000;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.7); // 70% quality JPEG
+            resolve(dataUrl);
+          } else {
+            resolve(event.target?.result as string);
+          }
+        };
+        img.onerror = () => {
+          resolve(event.target?.result as string);
+        };
+      };
+      reader.onerror = () => {
+        resolve("");
+      };
+    });
+  };
 
   // File Upload Helper
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "main" | "gallery") => {
@@ -174,10 +238,27 @@ export default function AdminDashboard() {
           showToast("Gallery image added!");
         }
       } else {
+        throw new Error("Upload api failed, falling back to base64");
+      }
+    } catch (err) {
+      console.warn("[Admin Image Upload] Falling back to client-side compressed base64 due to:", err);
+      try {
+        const base64Url = await readAsBase64WithCompression(file);
+        if (base64Url) {
+          if (target === "main") {
+            setProductForm(f => ({ ...f, image: base64Url }));
+            showToast("Main image uploaded (Optimized Base64)!");
+          } else {
+            const currentUrls = productForm.images ? productForm.images.split(",").map(s => s.trim()).filter(Boolean) : [];
+            setProductForm(f => ({ ...f, images: [...currentUrls, base64Url].join(", ") }));
+            showToast("Gallery image added (Optimized Base64)!");
+          }
+        } else {
+          showToast("Failed to process image", "error");
+        }
+      } catch {
         showToast("Upload failed", "error");
       }
-    } catch {
-      showToast("Upload failed", "error");
     } finally {
       setUploadingImage(false);
       setUploadingGallery(false);
@@ -636,6 +717,32 @@ export default function AdminDashboard() {
 
       {/* Main Panel Content */}
       <main className="lg:ml-64 flex-1 p-6 min-h-screen">
+        {/* Database Offline Warning Banner */}
+        {!dbConnected && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between text-amber-800 text-xs shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 animate-bounce" />
+              <div>
+                <span className="font-bold text-sm block mb-0.5">Supabase Database Offline (Running in Sandbox Mode)</span>
+                <p className="text-amber-600 font-light leading-relaxed">
+                  Your Supabase PostgreSQL database is currently sleeping, paused, or unreachable. All dashboard modifications (adding/editing/deleting products or categories) are saving to temporary in-memory arrays. <strong>These will reset on page reload.</strong> Please resume your Supabase project to restore persistent saving.
+                </p>
+              </div>
+            </div>
+            <a 
+              href="https://supabase.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="ml-4 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-bold shadow-sm transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+            >
+              Supabase Dashboard <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </motion.div>
+        )}
         {/* Mobile Header */}
         <div className="lg:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
           <span className="font-serif text-xl text-[var(--color-dark-rosegold)] font-bold">Admin Panel</span>

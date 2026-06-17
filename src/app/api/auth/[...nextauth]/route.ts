@@ -176,5 +176,20 @@ export const authOptions = {
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+const authHandler = async (req: any, context: any) => {
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+  const proto = req.headers.get('x-forwarded-proto') || 'https';
+  
+  if (host) {
+    if (!process.env.NEXTAUTH_URL || (process.env.NEXTAUTH_URL.includes('localhost') && !host.includes('localhost'))) {
+      const protocol = host.includes('localhost') ? 'http' : proto;
+      process.env.NEXTAUTH_URL = `${protocol}://${host}`;
+      console.log('[NextAuth] Dynamically configured NEXTAUTH_URL from request headers:', process.env.NEXTAUTH_URL);
+    }
+  }
+  
+  return handler(req, context);
+};
+
+export { authHandler as GET, authHandler as POST };
 

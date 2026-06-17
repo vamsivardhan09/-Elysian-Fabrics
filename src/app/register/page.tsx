@@ -400,28 +400,34 @@ export default function RegisterPage() {
                   try {
                     const checkRes = await fetch('/api/auth/google-config');
                     const config = await checkRes.json();
-                    if (config.configured || config.isProduction) {
+                    if (config.configured) {
                       signIn('google', { callbackUrl: '/' });
                     } else {
-                      console.log('[Register] Google OAuth not configured. Authenticating with offline Google Mock user...');
-                      const res = await signIn('credentials', {
-                        redirect: false,
-                        email: 'google-tester@example.com',
-                        password: 'google_mock_password',
-                      });
-                      if (res?.error) {
-                        setError('Google Mock Sign-In failed');
+                      if (config.isProduction) {
+                        setError('Google Client ID and Secret are not configured in Vercel environment variables. Please add Google OAuth credentials.');
                         setLoading(false);
                       } else {
-                        setSuccess(true);
-                        setRegisterSuccess(true);
-                        setTimeout(() => {
-                          router.push('/');
-                        }, 2000);
+                        console.log('[Register] Google OAuth not configured. Authenticating with offline Google Mock user...');
+                        const res = await signIn('credentials', {
+                          redirect: false,
+                          email: 'google-tester@example.com',
+                          password: 'google_mock_password',
+                        });
+                        if (res?.error) {
+                          setError('Google Mock Sign-In failed');
+                          setLoading(false);
+                        } else {
+                          setSuccess(true);
+                          setRegisterSuccess(true);
+                          setTimeout(() => {
+                            router.push('/');
+                          }, 2000);
+                        }
                       }
                     }
-                  } catch {
-                    signIn('google', { callbackUrl: '/' });
+                  } catch (err) {
+                    setError('Failed to configure Google Auth.');
+                    setLoading(false);
                   }
                 }}
                 disabled={loading}

@@ -12,6 +12,12 @@ const DEFAULT_CATEGORIES = [
   "Dresses"
 ];
 
+export let MOCK_CATEGORIES = DEFAULT_CATEGORIES.map((name, index) => ({
+  id: `mock-c${index + 1}`,
+  name,
+  createdAt: new Date().toISOString()
+}));
+
 export async function GET() {
   try {
     let categories = await prisma.category.findMany({
@@ -31,26 +37,21 @@ export async function GET() {
     return NextResponse.json(categories);
   } catch (error) {
     console.warn("[API/categories GET] Database unreachable. Falling back to default categories.", error);
-    const mockCategories = DEFAULT_CATEGORIES.map((name, index) => ({
-      id: `mock-c${index + 1}`,
-      name,
-      createdAt: new Date().toISOString()
-    }));
-    return NextResponse.json(mockCategories);
+    return NextResponse.json(MOCK_CATEGORIES);
   }
 }
 
 export async function POST(request: Request) {
+  const body = await request.json();
+  const { name } = body;
+
+  if (!name || !name.trim()) {
+    return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
+  }
+
+  const trimmedName = name.trim();
+
   try {
-    const body = await request.json();
-    const { name } = body;
-
-    if (!name || !name.trim()) {
-      return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
-    }
-
-    const trimmedName = name.trim();
-    
     // Check if duplicate
     const existing = await prisma.category.findUnique({
       where: { name: trimmedName }
@@ -64,28 +65,42 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(category, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create category:", error);
-    return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
+  } catch (error: any) {
+    console.warn("[API/categories POST] Database unreachable. Adding to in-memory mock categories:", error.message || error);
+    const existing = MOCK_CATEGORIES.find(c => c.name.toLowerCase() === trimmedName.toLowerCase());
+    if (existing) {
+      return NextResponse.json({ error: 'Category already exists' }, { status: 400 });
+    }
+    const mockCat = {
+      id: 'mock-c-' + Math.random().toString(36).substring(2, 7),
+      name: trimmedName,
+      createdAt: new Date().toISOString()
+    };
+    MOCK_CATEGORIES.push(mockCat);
+    return NextResponse.json(mockCat, { status: 201 });
   }
 }
 
 export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+
+  if (!id) {
+    return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (!id) {
-      return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
-    }
-
     await prisma.category.delete({
       where: { id }
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Failed to delete category:", error);
-    return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 });
+  } catch (error: any) {
+    console.warn("[API/categories DELETE] Database unreachable. Deleting from in-memory mock categories:", error.message || error);
+    const idx = MOCK_CATEGORIES.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      MOCK_CATEGORIES.splice(idx, 1);
+    }
+    return NextResponse.json({ success: true });
   }
 }

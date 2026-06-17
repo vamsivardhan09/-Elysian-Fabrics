@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-const MOCK_PRODUCTS = [
+export const MOCK_PRODUCTS = [
   {
     id: 'mock-p1',
     name: 'Embellished Banarasi Silk Saree',

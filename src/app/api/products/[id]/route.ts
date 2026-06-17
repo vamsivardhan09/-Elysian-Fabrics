@@ -1,13 +1,31 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { MOCK_PRODUCTS } from '../route';
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const product = await prisma.product.findUnique({ where: { id } });
-    if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    return NextResponse.json(product);
-  } catch {
+    
+    // Check mock products first if ID starts with 'mock-'
+    if (id && id.startsWith('mock-')) {
+      const mockProd = MOCK_PRODUCTS.find(p => p.id === id);
+      if (mockProd) return NextResponse.json(mockProd);
+    }
+
+    try {
+      const product = await prisma.product.findUnique({ where: { id } });
+      if (product) return NextResponse.json(product);
+    } catch (dbError) {
+      console.warn('[API/products/[id] GET] Database unreachable. Falling back to mock data lookup.', dbError);
+    }
+
+    // Fallback search in mock products if DB query returned null or failed
+    const fallbackProd = MOCK_PRODUCTS.find(p => p.id === id);
+    if (fallbackProd) return NextResponse.json(fallbackProd);
+
+    return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+  } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }

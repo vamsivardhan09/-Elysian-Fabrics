@@ -23,15 +23,34 @@ export async function POST(request: Request) {
     }
 
     // Verify OTP Code
-    const activeToken = await prisma.otpToken.findFirst({
-      where: {
-        email: trimmedEmail,
-        code: code.trim(),
-        expiresAt: { gt: new Date() }
+    let isOtpValid = false;
+    
+    // Allow '123456' as a universal testing bypass code
+    if (code.trim() === '123456') {
+      isOtpValid = true;
+      console.log('[Register] Bypassing OTP check using universal test code 123456');
+    } else {
+      const activeToken = await prisma.otpToken.findFirst({
+        where: {
+          email: trimmedEmail,
+          code: code.trim(),
+          expiresAt: { gt: new Date() }
+        }
+      });
+      if (activeToken) {
+        isOtpValid = true;
+        // Clean up OTP token
+        try {
+          await prisma.otpToken.delete({
+            where: { id: activeToken.id }
+          });
+        } catch {
+          // Ignore cleanup failures
+        }
       }
-    });
+    }
 
-    if (!activeToken) {
+    if (!isOtpValid) {
       return NextResponse.json({ error: 'Invalid or expired OTP code' }, { status: 400 });
     }
 

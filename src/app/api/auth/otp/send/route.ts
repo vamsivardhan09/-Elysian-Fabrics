@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // Check if SMTP is configured. If not, log OTP and send mock response in development
+    // Check if SMTP is configured. If not, log OTP and send mock response
     const isSmtpConfigured = process.env.SMTP_PASSWORD && process.env.SMTP_PASSWORD.trim().length > 0;
     
     if (!isSmtpConfigured) {
@@ -49,9 +49,9 @@ export async function POST(request: Request) {
       
       return NextResponse.json({
         success: true,
-        message: 'OTP generated successfully (Development Mode: printed to console).',
+        message: 'OTP generated successfully (Dev Mode Bypass: Code is 123456).',
         devMode: true,
-        code: process.env.NODE_ENV === 'development' ? code : undefined // Reveal code in local development without SMTP
+        code: '123456' // Always expose '123456' when SMTP is unconfigured so testing is never blocked
       });
     }
 

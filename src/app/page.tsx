@@ -5,7 +5,8 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Heart, ShoppingBag, Star, ArrowRight,
-  CheckCircle2, Sparkles, Scissors, Truck, Shield, ChevronRight, ChevronLeft, Grid
+  CheckCircle2, Sparkles, Scissors, Truck, Shield, ChevronRight, ChevronLeft, Grid,
+  MapPin, Phone, MessageSquare, Clock, Ruler, DollarSign, User
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -24,9 +25,233 @@ export default function Home() {
   const { data: session } = useSession();
   const { addToCart, toggleFavorite, favorites, isFavorite } = useShopStore();
 
+  const [shopSettings, setShopSettings] = useState({
+    shopName: "Hyderabad Flagship",
+    shopAddress: "Plot 42, Shilpa Hills, Madhapur, Hyderabad, Telangana, 500081",
+    contactPhone: "+91 98765 43210"
+  });
+
+  async function fetchSettings() {
+    try {
+      const res = await fetch("/api/settings");
+      if (res.ok) {
+        const data = await res.json();
+        setShopSettings({
+          shopName: data.shopName || "Hyderabad Flagship",
+          shopAddress: data.shopAddress || "Plot 42, Shilpa Hills, Madhapur, Hyderabad, Telangana, 500081",
+          contactPhone: data.contactPhone || "+91 98765 43210"
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   useEffect(() => {
     fetchProducts();
   }, [activeCategory]);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const renderWhyChooseUs = (isMobile: boolean) => {
+    const properties = [
+      {
+        icon: Sparkles,
+        title: "Wide Range of Styles",
+        desc: "From traditional to modern, there is absolutely nothing we cannot stitch to perfection."
+      },
+      {
+        icon: User,
+        title: "Personal Fashion Designer",
+        desc: "Get free design consultations and assistance throughout your outfit styling journey."
+      },
+      {
+        icon: Ruler,
+        title: "Online Measurements",
+        desc: "Schedule a virtual measurement call with our designer for a highly accurate remote fit."
+      },
+      {
+        icon: MapPin,
+        title: "Stitch & Alter Anywhere",
+        desc: "Your convenience is our priority. Get stitched in one city and altered in another."
+      },
+      {
+        icon: Truck,
+        title: "Boutique Pickup & Delivery",
+        desc: "Hassle-free custom pickup of your fabric from your home and doorstep delivery."
+      },
+      {
+        icon: ShoppingBag,
+        title: "Use Your Fabric or Ours",
+        desc: "Send us your raw material, or choose from our premium in-house collection of fabrics."
+      },
+      {
+        icon: Scissors,
+        title: "Free Lifetime Alterations",
+        desc: "We ensure your customized outfit fits perfectly. Enjoy free alterations anytime."
+      },
+      {
+        icon: Clock,
+        title: "Live Order Tracking",
+        desc: "Stay updated at every single stage, from cutting and stitching to packing."
+      }
+    ];
+
+    return (
+      <section className={`py-12 bg-white ${isMobile ? "px-4" : "py-20 border-t border-b border-gray-100"}`}>
+        <div className={isMobile ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className={`font-serif font-bold text-[var(--color-dark-rosegold)] ${isMobile ? "text-xl" : "text-3xl"}`}>
+              Why Choose Elysian Boutique?
+            </h2>
+            <p className="text-xs md:text-sm text-gray-500 mt-1 max-w-xl mx-auto font-light">
+              Your perfect tailoring partner for premium custom ethnic clothing
+            </p>
+            <div className="w-16 h-0.5 bg-[var(--color-rosegold)] mx-auto mt-2 rounded-full" />
+          </div>
+
+          <div className={`grid gap-4 ${isMobile ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 lg:grid-cols-4"}`}>
+            {properties.map((p, i) => (
+              <motion.div
+                key={p.title}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                viewport={{ once: true }}
+                className="bg-[var(--color-cream)]/30 border border-[var(--color-rosegold)]/10 rounded-2xl p-4 md:p-5 flex gap-3.5 hover:shadow-md hover:border-[var(--color-rosegold)]/35 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-[var(--color-rosegold)]/15 group-hover:bg-[var(--color-dark-rosegold)] transition-all flex-shrink-0">
+                  <p.icon className="w-5 h-5 text-[var(--color-dark-rosegold)] group-hover:text-white transition-colors" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-800 text-xs md:text-sm leading-tight mb-1">
+                    {p.title}
+                  </h4>
+                  <p className="text-[10px] md:text-xs text-gray-500 leading-normal font-light">
+                    {p.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  };
+
+  const renderExperienceCentres = (isMobile: boolean) => {
+    const outlets = [
+      {
+        name: shopSettings.shopName || "Hyderabad Flagship",
+        address: shopSettings.shopAddress,
+        phone: shopSettings.contactPhone,
+        whatsapp: shopSettings.contactPhone.replace(/[^+\d]/g, ""),
+        timings: "11:00 AM to 08:00 PM",
+        status: "Open Today"
+      },
+      {
+        name: "Bengaluru Studio",
+        address: "Shop No 1, Building No 4159, 14th Cross Road, Indiranagar, Bengaluru, Karnataka 560038",
+        phone: "+91 98765 43222",
+        whatsapp: "+919876543222",
+        timings: "10:30 AM to 07:30 PM",
+        status: "Open Today"
+      },
+      {
+        name: "Chennai Gallery",
+        address: "AB 149, Anna Nagar 3rd Main Road, Anna Nagar, Chennai, Tamil Nadu 600040",
+        phone: "+91 98765 43233",
+        whatsapp: "+919876543233",
+        timings: "11:00 AM to 08:00 PM",
+        status: "Open Today"
+      }
+    ];
+
+    return (
+      <section className={`py-12 bg-[var(--color-cream)]/20 border-t border-gray-100/50 ${isMobile ? "px-4" : "py-20"}`}>
+        <div className={isMobile ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className={`font-serif font-bold text-[var(--color-dark-rosegold)] ${isMobile ? "text-xl" : "text-3xl"}`}>
+              Boutique Experience Centres
+            </h2>
+            <p className="text-xs md:text-sm text-gray-500 mt-1 max-w-xl mx-auto font-light">
+              Visit our physical outlets to meet our designers and experience the fabrics firsthand
+            </p>
+            <div className="w-16 h-0.5 bg-[var(--color-rosegold)] mx-auto mt-2 rounded-full" />
+          </div>
+
+          <div className={`grid gap-6 ${isMobile ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-3"}`}>
+            {outlets.map((outlet, i) => (
+              <motion.div
+                key={outlet.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                viewport={{ once: true }}
+                className="bg-white border border-[var(--color-rosegold)]/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-serif font-bold text-gray-800 text-sm md:text-base leading-tight">
+                        {outlet.name}
+                      </h4>
+                      <span className="text-[10px] text-gray-400">Hyderabad & South India Presence</span>
+                    </div>
+                    <span className="bg-green-50 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-green-100">
+                      {outlet.status}
+                    </span>
+                  </div>
+
+                  <p className="text-[10px] md:text-xs text-gray-500 mb-4 font-light leading-relaxed flex gap-2">
+                    <MapPin className="w-4 h-4 text-[var(--color-rosegold)] flex-shrink-0 mt-0.5" />
+                    <span>{outlet.address}</span>
+                  </p>
+
+                  <div className="space-y-2 border-t border-gray-100 pt-3 mb-4">
+                    <div className="flex items-center gap-2 text-[10px] md:text-xs text-gray-600">
+                      <Clock className="w-3.5 h-3.5 text-gray-400" />
+                      <span>Timings: {outlet.timings}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] md:text-xs text-gray-600">
+                      <Phone className="w-3.5 h-3.5 text-gray-400" />
+                      <span>Phone: {outlet.phone}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  <button
+                    onClick={() => window.open(`tel:${outlet.phone}`)}
+                    className="flex items-center justify-center gap-1.5 py-2 bg-[var(--color-cream)] hover:bg-[var(--color-lightrose)] text-[var(--color-dark-rosegold)] text-[10px] font-bold rounded-xl border border-[var(--color-rosegold)]/10 transition-colors"
+                  >
+                    <Phone className="w-3 h-3" />
+                    Call
+                  </button>
+                  <button
+                    onClick={() => window.open(`https://wa.me/${outlet.whatsapp}`)}
+                    className="flex items-center justify-center gap-1.5 py-2 bg-green-50 hover:bg-green-100 text-green-700 text-[10px] font-bold rounded-xl border border-green-200/50 transition-colors"
+                  >
+                    <MessageSquare className="w-3 h-3" />
+                    WhatsApp
+                  </button>
+                  <button
+                    onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(outlet.name + ' ' + outlet.address)}`)}
+                    className="flex items-center justify-center gap-1.5 py-2 bg-[var(--color-dark-rosegold)] hover:bg-[var(--color-deeprose)] text-white text-[10px] font-bold rounded-xl transition-colors"
+                  >
+                    <MapPin className="w-3 h-3" />
+                    Directions
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  };
 
   // Auto-swipe banner timer for mobile promo slider
   useEffect(() => {
@@ -408,6 +633,12 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        {/* Competitor Features: Why Choose Us */}
+        {renderWhyChooseUs(true)}
+
+        {/* Competitor Experience Centres */}
+        {renderExperienceCentres(true)}
       </div>
 
       {/* ============================================================== */}
@@ -497,24 +728,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features */}
-        <section className="py-14 bg-white border-t border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
-                className="flex flex-col items-center text-center gap-3 p-4"
-              >
-                <div className="w-12 h-12 rounded-full bg-[var(--color-lightrose)] flex items-center justify-center">
-                  <f.icon className="w-5 h-5 text-[var(--color-rosegold)]" />
-                </div>
-                <h3 className="font-semibold text-gray-800 text-sm">{f.title}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        {/* Features: Why Choose Us */}
+        {renderWhyChooseUs(false)}
 
         {/* Categories */}
         <section id="categories" className="py-24 bg-[var(--color-cream)]">
@@ -683,6 +898,9 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        {/* Experience Centres */}
+        {renderExperienceCentres(false)}
 
         {/* Tailor CTA */}
         <section className="py-24 bg-gradient-to-r from-[var(--color-dark-rosegold)] to-[var(--color-rosegold)] relative overflow-hidden">

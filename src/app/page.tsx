@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useShopStore, Product } from "@/store/store";
 
-const CATEGORIES = ["All", "Sarees", "Kurtis", "Western Wear", "Dresses", "Party Wear", "Bridal Collection", "Anarkali"];
+const CATEGORIES = ["All", "Kurtis", "Blouses", "Fabrics"];
 
 export default function Home() {
   const router = useRouter();
@@ -64,13 +64,9 @@ export default function Home() {
   };
 
   const categoryImages: Record<string, string> = {
-    "Sarees": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80",
     "Kurtis": "https://images.unsplash.com/photo-1594938298603-c8148c4b44f0?w=600&q=80",
-    "Western Wear": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
-    "Dresses": "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600&q=80",
-    "Party Wear": "https://images.unsplash.com/photo-1566206091558-f3d32ab7423e?w=600&q=80",
-    "Bridal Collection": "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80",
-    "Anarkali": "https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=600&q=80",
+    "Blouses": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80",
+    "Fabrics": "https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=600&q=80",
   };
 
   const features = [
@@ -82,22 +78,22 @@ export default function Home() {
 
   const promoBanners = [
     {
-      title: "Bridal Couture Collection",
-      subtitle: "Get up to 40% Off on designer Wedding Sarees & Lehengas",
-      image: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
-      link: "/categories/Bridal%20Collection"
+      title: "Desi Couture Collection",
+      subtitle: "Get up to 40% Off on Designer Blouses & Kurtis",
+      image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80",
+      link: "/categories/Blouses"
     },
     {
       title: "Bespoke Custom Tailoring",
-      subtitle: "Doorstep measurements & perfect fit crafting from expert tailors",
+      subtitle: "Perfect fit crafting from expert tailors. Send your material or customize ours.",
       image: "https://images.unsplash.com/photo-1594938298603-c8148c4b44f0?w=1200&q=80",
       link: "/tailor"
     },
     {
-      title: "Luxurious Silk Sarees",
-      subtitle: "Explore handcrafted gold zari borders and Banarasi weaves",
-      image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80",
-      link: "/categories/Sarees"
+      title: "Premium Custom Fabrics",
+      subtitle: "Explore high-quality raw silks, brocades, and cotton fabrics",
+      image: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=1200&q=80",
+      link: "/categories/Fabrics"
     }
   ];
 
@@ -532,38 +528,21 @@ export default function Home() {
               <p className="text-gray-500 font-light">Explore our curated collections tailored just for you</p>
             </motion.div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {Object.entries(categoryImages).slice(0, 4).map(([name, img], i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {Object.entries(categoryImages).map(([name, img], i) => (
                 <motion.div
                   key={name}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}
                   onClick={() => { setActiveCategory(name); document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); }}
-                  className="group relative h-56 md:h-72 rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all"
+                  className="group relative h-56 md:h-80 rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all"
                 >
-                  <Image src={img} alt={name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 768px) 50vw, 25vw" />
+                  <Image src={img} alt={name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 33vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="text-base md:text-lg font-serif mb-1">{name}</h3>
                     <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
                       Shop Now <ChevronRight className="w-3 h-3 ml-1" />
                     </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mt-4">
-              {Object.entries(categoryImages).slice(4).map(([name, img], i) => (
-                <motion.div
-                  key={name}
-                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 + 0.4 }} viewport={{ once: true }}
-                  onClick={() => { setActiveCategory(name); document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); }}
-                  className="group relative h-44 md:h-56 rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all"
-                >
-                  <Image src={img} alt={name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width: 768px) 33vw, 25vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-sm md:text-base font-serif">{name}</h3>
                   </div>
                 </motion.div>
               ))}

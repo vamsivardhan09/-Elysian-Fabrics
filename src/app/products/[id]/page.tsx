@@ -23,6 +23,155 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   
+  // Custom Fit States
+  const [fitType, setFitType] = useState<"standard" | "custom" | "send_material">("standard");
+  const [customBust, setCustomBust] = useState("");
+  const [customWaist, setCustomWaist] = useState("");
+  const [customHips, setCustomHips] = useState("");
+  const [customSleeve, setCustomSleeve] = useState("");
+  const [customShoulder, setCustomShoulder] = useState("");
+  const [customLength, setCustomLength] = useState("");
+  const [customNeckline, setCustomNeckline] = useState("Round Neck");
+  const [courierName, setCourierName] = useState("");
+  const [courierTracking, setCourierTracking] = useState("");
+  const [shopSettings, setShopSettings] = useState({
+    shopName: "Elysian Custom Boutique",
+    shopAddress: "Plot 42, Shilpa Hills, Madhapur, Hyderabad, Telangana, 500081",
+    contactPhone: "+91 98765 43210"
+  });
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setShopSettings(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const renderFitSelection = (isMobile: boolean) => {
+    return (
+      <div className="space-y-4 border-t border-gray-150 pt-4 mt-4 text-left">
+        <div>
+          <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-bold text-gray-800 block mb-2`}>Choose Fit Option</span>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: "standard", label: "Standard Size", price: "" },
+              { id: "custom", label: "Custom Stitching", price: "+₹499" },
+              { id: "send_material", label: "Send Material", price: "+₹399" }
+            ].map(opt => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setFitType(opt.id as any)}
+                className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center cursor-pointer ${
+                  fitType === opt.id
+                    ? "border-[var(--color-dark-rosegold)] bg-[var(--color-lightrose)] text-[var(--color-dark-rosegold)] font-bold shadow-sm"
+                    : "border-gray-200 text-gray-500 bg-white hover:border-[var(--color-rosegold)]"
+                }`}
+              >
+                <span className="text-[10px] sm:text-xs block leading-tight">{opt.label}</span>
+                {opt.price && <span className="text-[9px] mt-0.5 text-gray-400 block">{opt.price}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {fitType === "standard" && sizes.length > 0 && (
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[11px] font-bold text-gray-600">Select Standard Size</span>
+              <span className="text-[9px] text-[var(--color-rosegold)] font-semibold underline cursor-pointer">Size Chart</span>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {sizes.map((size: string) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setSelectedSize(size)}
+                  className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                    selectedSize === size
+                      ? "border-[var(--color-dark-rosegold)] bg-[var(--color-dark-rosegold)] text-white shadow-sm"
+                      : "border-gray-200 text-gray-500 bg-white hover:border-[var(--color-rosegold)]"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {fitType === "custom" && (
+          <div className="bg-[var(--color-lightrose)]/40 p-4 rounded-2xl border border-[var(--color-rosegold)]/10 space-y-3">
+            <h4 className="text-xs font-bold text-[var(--color-dark-rosegold)] flex items-center gap-1">
+              <Scissors className="w-3.5 h-3.5" /> Bespoke Measurements (inches)
+            </h4>
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Bust *</label>
+                <input type="number" placeholder="e.g. 36" value={customBust} onChange={e => setCustomBust(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Waist *</label>
+                <input type="number" placeholder="e.g. 30" value={customWaist} onChange={e => setCustomWaist(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Hips *</label>
+                <input type="number" placeholder="e.g. 40" value={customHips} onChange={e => setCustomHips(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Sleeve *</label>
+                <input type="number" placeholder="e.g. 15" value={customSleeve} onChange={e => setCustomSleeve(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Shoulders *</label>
+                <input type="number" placeholder="e.g. 14.5" value={customShoulder} onChange={e => setCustomShoulder(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Outfit Length *</label>
+                <input type="number" placeholder="e.g. 54" value={customLength} onChange={e => setCustomLength(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] text-gray-500 mb-1 font-medium">Neckline Style *</label>
+              <select value={customNeckline} onChange={e => setCustomNeckline(e.target.value)} className="w-full bg-white border rounded-lg px-2 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)] text-xs">
+                {["Round Neck", "V-Neck", "Boat Neck", "Square Neck", "Sweetheart", "High Collar / Mandarin"].map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {fitType === "send_material" && (
+          <div className="bg-rose-50/50 p-4 rounded-2xl border border-rose-100/50 space-y-3">
+            <div>
+              <h4 className="text-[10px] font-bold text-[var(--color-dark-rosegold)] uppercase tracking-wider mb-0.5">Boutique Shipping Address</h4>
+              <p className="text-[11px] text-gray-800 font-semibold">{shopSettings.shopName}</p>
+              <p className="text-[11px] text-gray-500 font-light leading-relaxed mt-0.5">{shopSettings.shopAddress}</p>
+              <p className="text-[10px] text-gray-400 mt-1">Phone: {shopSettings.contactPhone}</p>
+            </div>
+            
+            <div className="border-t border-rose-100/40 pt-3 space-y-2 text-[11px]">
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Outgoing Courier/Carrier *</label>
+                <input type="text" placeholder="e.g. India Post, BlueDart" value={courierName} onChange={e => setCourierName(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+              <div>
+                <label className="block text-gray-500 mb-0.5 font-medium">Outgoing Tracking ID *</label>
+                <input type="text" placeholder="e.g. EM123456789IN" value={courierTracking} onChange={e => setCourierTracking(e.target.value)} className="w-full bg-white border rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--color-rosegold)]" />
+              </div>
+            </div>
+            <p className="text-[10px] text-rose-800 bg-rose-50 p-2 rounded-lg leading-snug">
+              <strong>Note:</strong> Write the Order ID (provided after checkout) on your package and place a printed order slip inside the package.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Tabs for desktop
   const [activeTab, setActiveTab] = useState<"description" | "care" | "sizing">("description");
 
@@ -99,7 +248,7 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
-    if (sizes.length > 0 && !selectedSize) { showToast("Please select a size"); return false; }
+    if (fitType === "standard" && sizes.length > 0 && !selectedSize) { showToast("Please select a size"); return false; }
     if (colors.length > 0 && !selectedColor) { showToast("Please select a color"); return false; }
     
     // Check stock
@@ -108,8 +257,51 @@ export default function ProductDetailPage() {
       return false;
     }
 
+    let itemPrice = product.price;
+    let customizationData = null;
+
+    if (fitType === "custom") {
+      itemPrice += 499;
+      if (!customBust || !customWaist || !customHips || !customSleeve || !customShoulder || !customLength) {
+        showToast("Please fill all measurements for Custom Stitching");
+        return false;
+      }
+      customizationData = JSON.stringify({
+        type: "custom_stitching",
+        measurements: {
+          bust: customBust,
+          waist: customWaist,
+          hips: customHips,
+          sleeveLength: customSleeve,
+          shoulders: customShoulder,
+          outfitLength: customLength,
+          necklineStyle: customNeckline
+        }
+      });
+    } else if (fitType === "send_material") {
+      itemPrice += 399;
+      if (!courierName || !courierTracking) {
+        showToast("Please fill courier name and tracking ID");
+        return false;
+      }
+      customizationData = JSON.stringify({
+        type: "send_material",
+        courierName,
+        courierTracking
+      });
+    }
+
+    const productToCart = {
+      ...product,
+      price: itemPrice
+    };
+
     for (let i = 0; i < quantity; i++) {
-      addToCart(product, { size: selectedSize || undefined, color: selectedColor || undefined });
+      addToCart(productToCart, { 
+        size: fitType === "standard" ? selectedSize : "Custom Fit", 
+        color: selectedColor || undefined,
+        customization: customizationData || undefined
+      });
     }
     showToast(`Added to cart! 🛍️`);
     return true;
@@ -286,30 +478,8 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Sizes */}
-          {sizes.length > 0 && (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-gray-800">Select Size</span>
-                <span className="text-[10px] text-[var(--color-rosegold)] font-semibold underline">Size Chart</span>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {sizes.map((size: string) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition-all ${
-                      selectedSize === size
-                        ? "border-[var(--color-dark-rosegold)] bg-[var(--color-dark-rosegold)] text-white"
-                        : "border-gray-200 text-gray-500"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Custom Fit / Size Picker */}
+          {renderFitSelection(true)}
 
           {/* Quantity */}
           <div>
@@ -605,29 +775,8 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Size Picker */}
-              {sizes.length > 0 && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-gray-800">Size</span>
-                    <button className="text-xs text-[var(--color-rosegold)] underline font-medium">Sizing Charts</button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {sizes.map((size: string) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 rounded-xl border-2 text-xs font-semibold transition-all ${selectedSize === size
-                          ? 'border-[var(--color-dark-rosegold)] bg-[var(--color-dark-rosegold)] text-white shadow-md'
-                          : 'border-gray-200 text-gray-500 hover:border-[var(--color-rosegold)] hover:text-[var(--color-rosegold)]'
-                          }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Custom Fit / Size Picker */}
+              {renderFitSelection(false)}
 
               {/* Quantity */}
               <div className="mb-6">

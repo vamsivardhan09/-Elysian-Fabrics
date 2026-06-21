@@ -93,3 +93,11 @@ model OrderItem {
   selectedColor  String?
   customization  String?  // JSON string for custom measurements/notes
 }
+
+model BoutiqueSettings {
+  id           String   @id @default(uuid())
+  shopName     String   @default("Elysian Custom Boutique")
+  shopAddress  String   @default("Plot 42, Shilpa Hills, Madhapur, Hyderabad, Telangana, 500081")
+  contactPhone String   @default("+91 98765 43210")
+  updatedAt    DateTime @updatedAt
+}

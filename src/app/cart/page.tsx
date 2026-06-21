@@ -5,7 +5,7 @@ import { useShopStore } from "@/store/store";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, ArrowLeft, ShoppingBag, Tag, Truck, CheckCircle2, Scissors } from "lucide-react";
+import { Trash2, ArrowLeft, ShoppingBag, Tag, Truck, CheckCircle2, Scissors, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CartPage() {
@@ -25,7 +25,53 @@ export default function CartPage() {
   
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"cart" | "checkout" | "success">("cart");
-  const [placedOrder, setPlacedOrder] = useState<{ trackingId: string; total: number } | null>(null);
+  const [placedOrder, setPlacedOrder] = useState<any | null>(null);
+
+  const [shopSettings, setShopSettings] = useState({
+    shopName: "Elysian Custom Boutique",
+    shopAddress: "Plot 42, Shilpa Hills, Madhapur, Hyderabad, Telangana, 500081",
+    contactPhone: "+91 98765 43210"
+  });
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setShopSettings(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const renderCustomizationDetails = (customizationStr?: string) => {
+    if (!customizationStr) return null;
+    try {
+      const data = JSON.parse(customizationStr);
+      if (data.type === "custom_stitching") {
+        return (
+          <div className="mt-1 text-[10px] text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100 font-sans text-left">
+            <p className="font-semibold text-[var(--color-dark-rosegold)] mb-0.5">Custom Stitching (+₹499)</p>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+              {Object.entries(data.measurements).map(([k, v]) => (
+                <p key={k} className="capitalize"><span className="text-gray-400 font-normal">{k.replace(/([A-Z])/g, ' $1')}:</span> {v}"</p>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      if (data.type === "send_material") {
+        return (
+          <div className="mt-1 text-[10px] text-gray-500 bg-rose-50/30 p-2 rounded-lg border border-rose-100/50 font-sans text-left">
+            <p className="font-semibold text-rose-800 mb-0.5">Send Material (+₹399)</p>
+            <p><span className="text-gray-400 font-normal">Courier:</span> {data.courierName}</p>
+            <p><span className="text-gray-400 font-normal">Tracking ID:</span> {data.courierTracking}</p>
+          </div>
+        );
+      }
+    } catch {
+      return <p className="text-[9px] text-[var(--color-rosegold)] mt-1 font-semibold text-left">Bespoke: {customizationStr}</p>;
+    }
+    return null;
+  };
 
   // Auto-fill user details if logged in
   useEffect(() => {
@@ -73,8 +119,40 @@ export default function CartPage() {
 
       if (res.ok) {
         const order = await res.json();
+        const hasSendMaterial = cart.some(item => {
+          try {
+            const data = JSON.parse(item.customization || "{}");
+            return data.type === "send_material";
+          } catch {
+            return false;
+          }
+        });
+
+        const hasCustomStitching = cart.some(item => {
+          try {
+            const data = JSON.parse(item.customization || "{}");
+            return data.type === "custom_stitching";
+          } catch {
+            return false;
+          }
+        });
+
+        const customItems = cart.filter(item => !!item.customization).map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          customization: item.customization
+        }));
+
         clearCart();
-        setPlacedOrder({ trackingId: order.trackingId, total: order.total });
+        setPlacedOrder({ 
+          trackingId: order.trackingId, 
+          total: order.total,
+          customerName: formData.name,
+          customerPhone: formData.phone,
+          hasSendMaterial,
+          hasCustomStitching,
+          customItems
+        });
         setStep("success");
       } else {
         alert("Failed to place order. Please try again.");
@@ -89,29 +167,96 @@ export default function CartPage() {
 
   if (step === "success" && placedOrder) {
     return (
-      <div className="min-h-screen bg-[var(--color-cream)] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[var(--color-cream)] flex items-center justify-center py-10 px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-3xl shadow-2xl p-6 md:p-10 max-w-md w-full text-center border border-gray-100"
+          className="bg-white rounded-3xl shadow-2xl p-6 md:p-10 max-w-lg w-full text-center border border-gray-100"
         >
           <motion.div
             initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }}
-            className="w-16 h-16 md:w-20 md:h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5"
+            className="w-16 h-16 md:w-20 md:h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5 print:hidden"
           >
             <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10 text-green-500" />
           </motion.div>
-          <h1 className="text-2xl md:text-3xl font-serif text-[var(--color-dark-rosegold)] mb-2 font-bold">Order Confirmed!</h1>
-          <p className="text-gray-400 mb-6 font-light text-xs">Thank you for your order. Payment mode is Cash on Delivery (COD).</p>
+          <h1 className="text-2xl md:text-3xl font-serif text-[var(--color-dark-rosegold)] mb-2 font-bold print:hidden">Order Confirmed!</h1>
+          <p className="text-gray-400 mb-6 font-light text-xs print:hidden">Thank you for your order. Payment mode is Cash on Delivery (COD).</p>
           
-          <div className="bg-[var(--color-lightrose)] rounded-2xl p-4 mb-5 border border-[var(--color-rosegold)]/10">
+          <div className="bg-[var(--color-lightrose)] rounded-2xl p-4 mb-5 border border-[var(--color-rosegold)]/10 print:hidden">
             <p className="text-[9px] text-gray-400 uppercase tracking-widest mb-1 font-semibold">Your Tracking ID</p>
             <p className="text-xl md:text-2xl font-bold text-[var(--color-dark-rosegold)] font-mono">{placedOrder.trackingId}</p>
             <p className="text-xs text-gray-500 mt-2 font-medium">Order Total: <span>₹{placedOrder.total.toLocaleString('en-IN')}</span></p>
           </div>
 
-          <p className="text-[10px] text-gray-400 mb-6 font-light">Please save this tracking ID. You can check progress inside your account profile or on the tracker page.</p>
+          {/* Printable Stitching Order Slip (for custom stitched or self-ship items) */}
+          {(placedOrder.hasSendMaterial || placedOrder.hasCustomStitching) && (
+            <div className="border-2 border-dashed border-gray-300 rounded-3xl p-5 bg-gray-50/50 my-6 text-left text-xs text-gray-700 max-w-md mx-auto print:border-solid print:bg-white print:p-8">
+              <div className="flex justify-between items-start border-b pb-3 mb-3">
+                <div>
+                  <h3 className="font-serif text-base font-bold text-gray-900">Elysian Fabrics</h3>
+                  <p className="text-[9px] text-gray-400">Custom Tailoring Stitching Slip</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] bg-gray-150 text-gray-800 font-bold px-2 py-0.5 rounded font-mono">
+                    Order ID: {placedOrder.trackingId}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <p><span className="font-semibold text-gray-500">Customer:</span> {placedOrder.customerName}</p>
+                <p><span className="font-semibold text-gray-500">Phone:</span> {placedOrder.customerPhone}</p>
+                
+                {placedOrder.customItems.map((item: any, idx: number) => {
+                  let cust = { type: "", measurements: {}, courierName: "", courierTracking: "" };
+                  try { cust = JSON.parse(item.customization); } catch {}
+                  return (
+                    <div key={idx} className="border-t pt-3 mt-3">
+                      <p className="font-semibold text-gray-800">{item.name} <span className="text-[10px] font-normal text-gray-400">({item.quantity} Qty)</span></p>
+                      
+                      {cust.type === "custom_stitching" && (
+                        <div className="mt-2">
+                          <p className="font-bold text-[var(--color-dark-rosegold)] text-[10px] mb-1">Custom Measurements (inches):</p>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 bg-white p-2 rounded-xl border border-gray-100">
+                            {Object.entries(cust.measurements).map(([k, v]) => (
+                              <p key={k} className="capitalize text-[10px]">
+                                <span className="font-medium text-gray-400">{k.replace(/([A-Z])/g, ' $1')}:</span> {v}"
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-          <div className="space-y-3">
+                      {cust.type === "send_material" && (
+                        <div className="mt-2 bg-rose-50/50 p-2.5 rounded-xl border border-rose-100/50 text-[10px] text-rose-800">
+                          <p className="font-bold text-rose-900 uppercase text-[9px] tracking-wider mb-1">Self Ship Shipping Instructions</p>
+                          <p><span className="font-semibold text-rose-700">Courier:</span> {cust.courierName}</p>
+                          <p><span className="font-semibold text-rose-700">Tracking:</span> {cust.courierTracking}</p>
+                          <p className="mt-2 text-[9px] text-rose-750">
+                            Write <strong>Order ID: {placedOrder.trackingId}</strong> on top of your courier package and put this printed slip inside the box before shipping it to:
+                          </p>
+                          <p className="mt-1 font-bold text-rose-900">{shopSettings.shopName}</p>
+                          <p className="font-light text-rose-800">{shopSettings.shopAddress}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 text-center print:hidden">
+                <button 
+                  onClick={() => window.print()} 
+                  className="px-4 py-2 border border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" /> Print Stitching Slip
+                </button>
+              </div>
+            </div>
+          )}
+
+          <p className="text-[10px] text-gray-400 mb-6 font-light print:hidden">Please save this tracking ID. You can check progress inside your account profile or on the tracker page.</p>
+
+          <div className="space-y-3 print:hidden">
             <button
               onClick={() => router.push(`/orders?id=${placedOrder.trackingId}`)}
               className="w-full py-3 bg-[var(--color-dark-rosegold)] text-white rounded-xl font-semibold hover:bg-[var(--color-deeprose)] transition-colors shadow-md text-xs cursor-pointer"
@@ -121,7 +266,7 @@ export default function CartPage() {
             <button
               onClick={() => {
                 const shopPhone = "919000000000";
-                const text = encodeURIComponent(`Hello Elysian Fabrics! 🌸\n\nI just placed a COD order.\n*Tracking ID:* ${placedOrder.trackingId}\n*Total:* ₹${placedOrder.total.toLocaleString('en-IN')}\n*Name:* ${formData.name}\n\nPlease verify my order. Thank you!`);
+                const text = encodeURIComponent(`Hello Elysian Fabrics! 🌸\n\nI just placed an order with Custom Tailoring.\n*Tracking ID:* ${placedOrder.trackingId}\n*Total:* ₹${placedOrder.total.toLocaleString('en-IN')}\n*Name:* ${placedOrder.customerName}\n\nPlease confirm my custom order measurements. Thank you!`);
                 window.open(`https://wa.me/${shopPhone}?text=${text}`, "_blank");
               }}
               className="w-full py-3 border border-green-500 text-green-600 rounded-xl font-semibold hover:bg-green-50 transition-colors flex items-center justify-center gap-1.5 text-xs cursor-pointer"
@@ -195,7 +340,7 @@ export default function CartPage() {
                             {item.selectedSize && <span className="text-[9px] bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100 font-bold">Size: {item.selectedSize}</span>}
                             {item.selectedColor && <span className="text-[9px] bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100 font-bold">Color: {item.selectedColor}</span>}
                           </div>
-                          {item.customization && <p className="text-[9px] text-[var(--color-rosegold)] mt-1 font-semibold">Bespoke: {item.customization}</p>}
+                          {item.customization && renderCustomizationDetails(item.customization)}
                           
                           <div className="flex items-center justify-between mt-3">
                             <div className="flex items-center border border-gray-200 rounded-full px-2 py-0.5 bg-gray-50">

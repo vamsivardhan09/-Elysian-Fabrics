@@ -2,14 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 const DEFAULT_CATEGORIES = [
-  "Sarees",
   "Kurtis",
   "Blouses",
-  "Anarkalis",
-  "Bridal Collection",
-  "Party Wear",
-  "Western Wear",
-  "Dresses"
+  "Fabrics"
 ];
 
 export let MOCK_CATEGORIES = DEFAULT_CATEGORIES.map((name, index) => ({

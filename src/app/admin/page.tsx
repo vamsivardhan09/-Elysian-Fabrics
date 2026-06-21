@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Package, ShoppingBag, BarChart2, Plus, Edit2, Trash2, X,
   LogOut, Search, ExternalLink, CheckCircle2, Clock, Truck, XCircle,
-  RefreshCw, Save, AlertTriangle, Eye, DollarSign, Tag, Upload, AlertCircle, List
+  RefreshCw, Save, AlertTriangle, Eye, DollarSign, Tag, Upload, AlertCircle, List,
+  Scissors, Settings
 } from "lucide-react";
 
 type Product = {
@@ -38,15 +39,18 @@ type Category = {
 
 const SIZES_DEFAULT = ["XS", "S", "M", "L", "XL", "XXL", "One Size"];
 const COLORS_LIST = ["Red", "Blue", "Green", "Pink", "Purple", "Yellow", "Orange", "Black", "White", "Brown", "Gold", "Silver", "Teal", "Maroon", "Navy", "Beige", "Peach", "Lavender", "Rose", "Coral"];
-const STATUS_OPTIONS = ["PENDING", "PROCESSING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUS_OPTIONS = ["PENDING", "PROCESSING", "AWAITING_MATERIAL", "MATERIAL_RECEIVED", "STITCHING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"];
 
 const statusConfig: Record<string, { label: string; badge: string; icon: any }> = {
-  PENDING:    { label: "Placed",      badge: "badge-pending",    icon: Clock },
-  PROCESSING: { label: "Processing",  badge: "badge-processing", icon: RefreshCw },
-  PACKED:     { label: "Packed",      badge: "bg-purple-50 text-purple-700 border-purple-100", icon: Package },
-  SHIPPED:    { label: "Shipped",     badge: "badge-shipped",    icon: Truck },
-  DELIVERED:  { label: "Delivered",   badge: "badge-delivered",  icon: CheckCircle2 },
-  CANCELLED:  { label: "Cancelled",   badge: "badge-cancelled",  icon: XCircle },
+  PENDING:            { label: "Placed",           badge: "badge-pending",    icon: Clock },
+  PROCESSING:         { label: "Processing",       badge: "badge-processing", icon: RefreshCw },
+  AWAITING_MATERIAL:  { label: "Awaiting Fabric",  badge: "bg-orange-50 text-orange-700 border-orange-100", icon: Clock },
+  MATERIAL_RECEIVED:  { label: "Fabric Received",  badge: "bg-blue-50 text-blue-700 border-blue-100", icon: Package },
+  STITCHING:          { label: "Stitching",        badge: "bg-pink-50 text-pink-700 border-pink-100", icon: Scissors },
+  PACKED:             { label: "Packed",           badge: "bg-purple-50 text-purple-700 border-purple-100", icon: Package },
+  SHIPPED:            { label: "Shipped",          badge: "badge-shipped",    icon: Truck },
+  DELIVERED:          { label: "Delivered",        badge: "badge-delivered",  icon: CheckCircle2 },
+  CANCELLED:          { label: "Cancelled",        badge: "badge-cancelled",  icon: XCircle },
 };
 
 const emptyProduct = {
@@ -58,7 +62,50 @@ const emptyProduct = {
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "categories" | "orders">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "categories" | "orders" | "settings">("dashboard");
+  
+  // Boutique Settings Form
+  const [shopName, setShopName] = useState("");
+  const [shopAddress, setShopAddress] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  async function fetchSettings() {
+    try {
+      const res = await fetch("/api/settings");
+      if (res.ok) {
+        const data = await res.json();
+        setShopName(data.shopName || "Elysian Custom Boutique");
+        setShopAddress(data.shopAddress || "Plot 42, Shilpa Hills, Madhapur, Hyderabad, Telangana, 500081");
+        setContactPhone(data.contactPhone || "+91 98765 43210");
+      }
+    } catch {}
+  }
+
+  const handleSettingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shopName, shopAddress, contactPhone }),
+      });
+      if (res.ok) {
+        showToast("Boutique settings updated!");
+      } else {
+        showToast("Failed to update boutique settings", "error");
+      }
+    } catch {
+      showToast("Error updating settings", "error");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
   
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -407,6 +454,7 @@ export default function AdminDashboard() {
     { id: "products", label: "Products", icon: Package },
     { id: "categories", label: "Categories", icon: Tag },
     { id: "orders", label: "Orders", icon: ShoppingBag },
+    { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
   return (
@@ -1063,6 +1111,60 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
+          </motion.div>
+        )}
+
+        {/* 5. SETTINGS TAB */}
+        {activeTab === "settings" && (
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 max-w-2xl">
+            <h1 className="text-3xl font-serif text-[var(--color-dark-rosegold)] font-bold mb-8">Boutique Settings</h1>
+            
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+              <h2 className="text-sm font-semibold text-gray-800 mb-6 border-b pb-3 font-serif">Tailor Shop Details</h2>
+              <form onSubmit={handleSettingsSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Shop Name *</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={shopName} 
+                    onChange={e => setShopName(e.target.value)} 
+                    className="input-base"
+                    placeholder="Elysian Custom Boutique"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Physical Shop Address (for Material Shipments) *</label>
+                  <textarea 
+                    required 
+                    value={shopAddress} 
+                    onChange={e => setShopAddress(e.target.value)} 
+                    className="input-base resize-none" 
+                    rows={3}
+                    placeholder="Full postal address of the boutique..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Contact Phone Number *</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={contactPhone} 
+                    onChange={e => setContactPhone(e.target.value)} 
+                    className="input-base"
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
+                
+                <button 
+                  type="submit" 
+                  disabled={savingSettings}
+                  className="px-6 py-3 bg-[var(--color-dark-rosegold)] hover:bg-[var(--color-deeprose)] text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" /> {savingSettings ? "Saving Settings..." : "Save Shop Settings"}
+                </button>
+              </form>
+            </div>
           </motion.div>
         )}
       </main>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import { sendOrderConfirmationEmail } from '@/lib/mail';
 
 export async function GET(request: Request) {
   try {
@@ -80,6 +81,28 @@ export async function POST(request: Request) {
       include: {
         items: { include: { product: true } },
       },
+    });
+
+    let shopSettings = {
+      shopName: "Elysian Custom Boutique",
+      shopAddress: "Plot 42, Shilpa Hills, Madhapur, Hyderabad, Telangana, 500081",
+      contactPhone: "+91 98765 43210"
+    };
+    try {
+      const settings = await prisma.boutiqueSettings.findFirst();
+      if (settings) {
+        shopSettings = {
+          shopName: settings.shopName,
+          shopAddress: settings.shopAddress,
+          contactPhone: settings.contactPhone
+        };
+      }
+    } catch (e) {
+      console.warn("Could not fetch settings from DB, using fallback", e);
+    }
+
+    sendOrderConfirmationEmail(order, shopSettings).catch(e => {
+      console.error("Failed to send order confirmation email:", e);
     });
 
     return NextResponse.json(order, { status: 201 });

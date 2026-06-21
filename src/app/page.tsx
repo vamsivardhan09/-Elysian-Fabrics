@@ -131,7 +131,7 @@ export default function Home() {
             className="flex items-center gap-3 bg-gray-100/90 px-4 py-2.5 rounded-full border border-gray-100/60 cursor-pointer active:bg-gray-200/50 transition-colors"
           >
             <Search className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-400 text-xs font-normal">Search for sarees, blouses, kurtis, gowns...</span>
+            <span className="text-gray-400 text-xs font-normal">Search for blouses, kurtis, fabrics...</span>
           </div>
         </div>
 

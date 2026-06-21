@@ -128,7 +128,7 @@ export function AppShell({ children }: AppShellProps) {
                 <input
                   autoFocus
                   type="text"
-                  placeholder="Search for dresses, sarees, kurtis..."
+                  placeholder="Search for blouses, kurtis, fabrics..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 text-base md:text-lg outline-none text-gray-800 placeholder-gray-400"
@@ -321,7 +321,7 @@ export function AppShell({ children }: AppShellProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <span className="font-serif text-2xl text-white font-bold block mb-4">Elysian Fabrics</span>
-              <p className="text-sm">Premium traditional fashion boutique offering handcrafted sarees, custom tailored blouses, and bridal outfits.</p>
+              <p className="text-sm">Premium traditional fashion boutique offering custom tailored blouses, kurtis, and fabrics.</p>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">Quick Links</h4>

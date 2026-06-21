@@ -6,16 +6,12 @@ import Image from "next/image";
 import { ChevronRight, Sparkles, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 
-const DEFAULT_CATEGORIES = ["Sarees", "Kurtis", "Western Wear", "Dresses", "Party Wear", "Bridal Collection", "Anarkali"];
+const DEFAULT_CATEGORIES = ["Kurtis", "Blouses", "Fabrics"];
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  "Sarees": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80",
   "Kurtis": "https://images.unsplash.com/photo-1594938298603-c8148c4b44f0?w=600&q=80",
-  "Western Wear": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
-  "Dresses": "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600&q=80",
-  "Party Wear": "https://images.unsplash.com/photo-1566206091558-f3d32ab7423e?w=600&q=80",
-  "Bridal Collection": "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80",
-  "Anarkali": "https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=600&q=80",
+  "Blouses": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80",
+  "Fabrics": "https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=600&q=80",
 };
 
 export default function CategoriesPage() {

@@ -983,7 +983,7 @@ export default function AdminDashboard() {
                       required
                       value={newCategoryName} 
                       onChange={e => setNewCategoryName(e.target.value)} 
-                      placeholder="e.g. Kurtis, Sarees"
+                      placeholder="e.g. Kurtis, Blouses"
                       className="input-base text-xs"
                     />
                   </div>

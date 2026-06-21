@@ -341,7 +341,7 @@ export default function RegisterPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="input-base pl-11 pr-11 focus:ring-2 focus:ring-[var(--color-rosegold)] focus:border-transparent focus:shadow-[0_0_15px_rgba(212,163,115,0.15)] transition-all duration-300 outline-none" 
-                      placeholder="••••••••"
+                      placeholder="Create password (min 6 characters)"
                       required 
                     />
                     <button 
@@ -363,7 +363,7 @@ export default function RegisterPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className="input-base pl-11 pr-11 focus:ring-2 focus:ring-[var(--color-rosegold)] focus:border-transparent focus:shadow-[0_0_15px_rgba(212,163,115,0.15)] transition-all duration-300 outline-none" 
-                      placeholder="••••••••"
+                      placeholder="Confirm password"
                       required 
                     />
                   </div>

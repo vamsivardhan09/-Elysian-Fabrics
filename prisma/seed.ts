@@ -34,9 +34,9 @@ async function main() {
       name: 'Chikankari Hand-Embroidered Georgette Kurti',
       price: 2199,
       originalPrice: 2999,
-      image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1608748010899-18f300247112?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80'
+        'https://images.unsplash.com/photo-1608748010899-18f300247112?w=1200&q=80'
       ]),
       description: 'Exquisite hand-embroidered Lucknowi Chikankari georgette kurti set featuring delicate floral motifs and fine thread work. Pair with palazzos for an elegant ethnic style.',
       category: 'Kurtis',
@@ -52,9 +52,9 @@ async function main() {
       name: 'Indigo Hand-Block Printed Cotton A-Line Kurti',
       price: 1399,
       originalPrice: 1899,
-      image: 'https://images.unsplash.com/photo-1594938298603-c8148c4b44f0?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1594938298603-c8148c4b44f0?w=1200&q=80'
+        'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?w=1200&q=80'
       ]),
       description: 'Authentic Rajasthani hand-block printed indigo cotton kurti. Designed in a flowy A-line shape with a split neckline and contrast side borders. Extremely breathable.',
       category: 'Kurtis',
@@ -70,9 +70,9 @@ async function main() {
       name: 'Royal Banarasi Silk Anarkali Gown',
       price: 3299,
       originalPrice: 4299,
-      image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=1200&q=80'
+        'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80'
       ]),
       description: 'A grand floor-length Banarasi silk Anarkali gown highlighting rich zari borders and traditional motifs. Perfect for weddings and festive occasions. Comes with a matching dupatta.',
       category: 'Kurtis',
@@ -88,9 +88,9 @@ async function main() {
       name: 'Designer Raw Silk Aari-Work Blouse',
       price: 1699,
       originalPrice: 2499,
-      image: 'https://images.unsplash.com/photo-1566206091558-f3d32ab7423e?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1566206091558-f3d32ab7423e?w=1200&q=80'
+        'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=1200&q=80'
       ]),
       description: 'Custom-stitched premium raw silk blouse showcasing intricate hand-crafted Maggam/Aari embroidery on the back and sleeves. Features an adjustable back dori with bells.',
       category: 'Blouses',
@@ -106,9 +106,9 @@ async function main() {
       name: 'Velvet Padded Sleeveless Blouse',
       price: 1199,
       originalPrice: 1599,
-      image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80'
+        'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=1200&q=80'
       ]),
       description: 'Elegant sleeveless blouse made of heavy micro-velvet, padded with high-quality cups for a seamless look. Designed with a deep U-neck front and back.',
       category: 'Blouses',
@@ -124,9 +124,9 @@ async function main() {
       name: 'Banarasi Brocade High-Neck Blouse',
       price: 1499,
       originalPrice: 1999,
-      image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1617626033036-7c010b991ea4?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=80'
+        'https://images.unsplash.com/photo-1617626033036-7c010b991ea4?w=1200&q=80'
       ]),
       description: 'Sophisticated high-neck blouse stitched from traditional Banarasi brocade fabric. Features a front keyhole design and elbow-length sleeves with gold piping.',
       category: 'Blouses',
@@ -142,9 +142,9 @@ async function main() {
       name: 'Pure Kanchipuram Silk Fabric (Per Meter)',
       price: 899,
       originalPrice: 1299,
-      image: 'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1606744824163-985d376605aa?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=1200&q=80'
+        'https://images.unsplash.com/photo-1606744824163-985d376605aa?w=1200&q=80'
       ]),
       description: 'Premium pure Kanchipuram silk material sold per meter. Features a lustrous dual-tone finish with woven zari border. Ideal for stitching custom designer blouses, skirts, or kurtas.',
       category: 'Fabrics',
@@ -160,9 +160,9 @@ async function main() {
       name: 'Handloom Ikat Cotton Fabric (Per Meter)',
       price: 299,
       originalPrice: 399,
-      image: 'https://images.unsplash.com/photo-1566206091558-f3d32ab7423e?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1566206091558-f3d32ab7423e?w=1200&q=80'
+        'https://images.unsplash.com/photo-1544816155-12df9643f363?w=1200&q=80'
       ]),
       description: 'Authentic hand-woven double Ikat cotton fabric from Pochampally. Hand-dyed using organic colors, perfect for customized daily-wear kurtis, shirts, or kidswear.',
       category: 'Fabrics',
@@ -178,9 +178,9 @@ async function main() {
       name: 'Heavy Organza Floral Fabric (Per Meter)',
       price: 399,
       originalPrice: 499,
-      image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80',
+      image: 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=1200&q=80',
       images: JSON.stringify([
-        'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&q=80'
+        'https://images.unsplash.com/photo-1574169208507-84376144848b?w=1200&q=80'
       ]),
       description: 'Semi-sheer, stiff organza fabric featuring vibrant digital floral prints. Stitches beautiful voluminous skirts, light summer kurtis, or designer puff-sleeve overlays.',
       category: 'Fabrics',
